@@ -1,0 +1,3 @@
+
+aws: [ERROR]: An error occurred (InvalidParameterCombination) when calling the RunInstances operation: The specified instance type is not eligible for Free Tier. For a list of Free Tier instance types, run 'describe-instance-types' with the filter 'free-tier-eligible=true'.
+Stage 2 failed; cleaning project resources.

@@ -1,0 +1,6 @@
+.opencsusm-state/
+*.pem
+*.gguf
+*.safetensors
+.env
+.env.*

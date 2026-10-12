@@ -1,0 +1,24 @@
+{
+  "project": "OpenCSUSM45567",
+  "lane": "cpu",
+  "instanceType": "c7i.2xlarge",
+  "region": "us-east-1",
+  "gpuQuotaVcpu": 0,
+  "standardQuotaVcpu": 32,
+  "computePriceUsdPerHour": 0.357,
+  "stage1ExitCode": 0,
+  "stage2ExitCode": 254,
+  "stage3Through6": "not run",
+  "stage7": "no instance to stop",
+  "stage8ExitCode": 0,
+  "stage8StdoutBytes": 0,
+  "stage8StderrBytes": 0,
+  "resourcesAfterCleanup": {
+    "keyPairs": [],
+    "instances": [],
+    "securityGroups": [],
+    "volumes": []
+  },
+  "completion": "blocked, not submission-ready",
+  "recordedAtUtc": "2026-10-12T04:45:13.0891729+00:00"
+}
