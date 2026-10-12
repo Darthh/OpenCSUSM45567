@@ -1,0 +1,1 @@
+ssh -i '/c/Users/patri/OpenCSUSM45567-1/submission/.opencsusm-state/opencsusm45567-20261011.pem' -o ExitOnForwardFailure=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile='/c/Users/patri/OpenCSUSM45567-1/submission/.opencsusm-state/known_hosts' -N -L 127.0.0.1:11435:127.0.0.1:11434 ubuntu@3.238.187.128

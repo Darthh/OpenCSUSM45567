@@ -1,0 +1,2 @@
+{"id":"chatcmpl-978","object":"chat.completion","created":1791780659,"model":"qwen2.5:0.5b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"Hello John! It's nice to meet you. How can I assist you today?"},"finish_reason":"stop"}],"usage":{"prompt_tokens":32,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens":18,"total_tokens":50}}
+

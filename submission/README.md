@@ -1,72 +1,71 @@
 # OpenCSUSM45567 - CS 446 midterm
 
-Status: **blocked at stage 2; not a completed midterm submission**.
+**The John task passed on the user-authorized Free-plan workaround. All eight stages ran, and teardown was verified.**
 
-## Choices
+The PDF names `c7i.2xlarge` for the CPU lane. AWS rejected that type on this account's Free plan. The user then authorized a Free-plan workaround, so the run used `c7i-flex.large` with the same engine, model, prompt, SSH-only access, and teardown. This instance substitution is a documented difference from the PDF; instructor acceptance of that difference has not been established. No Canvas submission was made.
 
-- Lane: `cpu`. Qwen2.5-0.5B needs no GPU to answer the greeting; the live G-instance quota is 0 vCPUs, while the Standard instance quota is 32 vCPUs.
-- Exact PDF instance: `c7i.2xlarge`, 8 vCPUs and 16 GiB RAM, Ubuntu 24.04, `us-east-1`.
-- Engine: Ollama only. No vLLM installation.
-- Model: official `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, Q4_K_M, 0.49B parameters, exposed through Ollama as `qwen2.5:0.5b`.
-- Live AWS Linux compute price: **$0.357/hour**, checked before launch. EBS, IPv4, and applicable data transfer are additional charges; the compute price alone is not the total bill.
-- Network: the script permits only TCP 22 from the laptop's current public IPv4 `/32`. Ollama is configured for `127.0.0.1:11434`. The client reaches it through an SSH tunnel, never a public inference port.
-- Cost control: one instance, encrypted 20 GiB gp3 root disk with `DeleteOnTermination=true`, one-hour emergency shutdown, then mandatory stage 8 teardown. An emergency stop is not disk deletion.
+## Choices and actual reply
 
-## Actual execution on October 11, 2026 (America/Los_Angeles)
+- Lane: `cpu`, because a 0.5B greeting needs no GPU and the live G-instance quota was 0 vCPUs.
+- Instance: one `c7i-flex.large`, 2 vCPUs, 4 GiB RAM, Ubuntu 24.04, `us-east-1`. Both the instance and Ubuntu image were verified Free Tier eligible.
+- Engine: Ollama 0.40.3, running on CPU. No vLLM installation.
+- Model: official Hugging Face `Qwen/Qwen2.5-0.5B-Instruct-GGUF`, Q4_K_M, imported as `qwen2.5:0.5b`.
+- Live compute list price: $0.08479/hour, checked before launch. The Free plan uses remaining credits; EBS, public IPv4, and applicable data transfer are additional usage. Final billed usage can be delayed, so no exact final charge is claimed.
+
+The actual user message was `I am John`, with `max_tokens=20` and `temperature=0`. The EC2 model replied:
+
+> Hello John! It's nice to meet you. How can I assist you today?
+
+The complete, unedited response JSON is in `evidence/stage6-reply.json` and pasted as a comment at the bottom of `opencsusm.sh`. It reports 18 completion tokens and a normal `stop` finish reason.
+
+## Verified execution on October 11, 2026 (America/Los_Angeles)
 
 | Stage | Result | Evidence |
 | --- | --- | --- |
-| 1: quota and live price | Passed | `evidence/stage1.txt` |
-| 2: launch | **Blocked by AWS Free plan** | `evidence/stage2-stderr.txt`; exit 254 |
-| 3: install engine on EC2 | Not run; no instance launched | No cloud-install claim |
-| 4: download/import model on EC2 | Not run; no instance launched | Hugging Face file downloaded and checksum-verified locally only |
-| 5: SSH tunnel | Not run; no instance launched | No tunnel claim |
-| 6: `I am John` greeting | **Not run** | No fabricated reply; no local reply substituted |
-| 7: stop instance | Not applicable; none launched | Stage 2 failed before instance creation |
-| 8: delete and verify | Passed after failed launch | Exit 0, zero-byte stdout and stderr; four empty resource lists |
+| 1: quota and live price | Passed: G quota 0, Standard quota 32, $0.08479/hour | `stage1.txt` |
+| 2: launch | Passed: exactly one c7i-flex.large | `stage2-stdout.txt`, `run-status.json` |
+| 3: install engine on EC2 | Passed: Ollama 0.40.3 | `stage3-stdout.txt` |
+| 4: download/import model on EC2 | Passed: official weights, SHA-256 matches, alias imported | `stage4-stdout.txt`, `model-manifest.json` |
+| 5: SSH tunnel | Passed: laptop 127.0.0.1:11435 to EC2 127.0.0.1:11434 | `stage5-tunnel-command.txt` |
+| 6: John greeting | Passed: actual assistant reply contains John | `stage6-reply.json` |
+| 7: stop instance | Passed: AWS state verified stopped | `stage7-stdout.txt`, `stage7-stderr.txt`, `run-status.json` |
+| 8: delete and verify | Passed: exit 0; stdout and stderr both 0 bytes | `stage8-stdout.txt`, `stage8-stderr.txt`, four empty inventories |
 
-The actual AWS launch error was:
+All listed evidence files are under `submission/evidence/`. The instance's final AWS state is `terminated`; all project nonterminated-instance, volume, security-group, and key-pair inventories are `[]`. `account-plan-after-run.json` confirms **FREE / ACTIVE** after the run. The private key was deleted. No account upgrade, AWS Organization, or Control Tower change was made.
 
-```text
-InvalidParameterCombination: The specified instance type is not eligible for Free Tier. For a list of Free Tier instance types, run 'describe-instance-types' with the filter 'free-tier-eligible=true'.
-```
+## Endpoint and cost controls
 
-AWS's earlier dry-run permission check returned `DryRunOperation`; the actual launch still rejected the type. No project instance or EBS disk launched. The temporary project key pair and security group were deleted automatically after failure. Stage 8 was then run explicitly and independently verified against instances, volumes, security groups, and key pairs. All four resource lists are `[]`.
+The security group had exactly one inbound rule: TCP 22 from the laptop's public IPv4 `/32`. No inference port or IPv6 ingress was opened. `network-verification.json` records the verified rule while omitting the owner's address. Ollama's actual listening socket was `127.0.0.1:11434`, captured in stage 4. The request used local port 11435 because the laptop's existing Ollama service occupies 11434; the remote model port remained 11434. The SSH tunnel closed when the instance stopped.
 
-The user selected the exact PDF instance and instructed the run to stop if the Free plan blocks it. No instance substitution, paid-plan upgrade, AWS Organization, or Control Tower change was made. The Free plan remains the blocker. Completing stages 3-6 requires an account permitted to launch the exact instance, or instructor-approved permission to change the instance type.
+The root disk was encrypted 20 GiB gp3 with `DeleteOnTermination=true`. The script includes an emergency one-hour compute shutdown, automatic launch-failure cleanup, and explicit stage 8 disk/resource deletion. Stopping alone is not teardown.
 
-## Downloaded model
+## Model download and rerunning
 
-The model was downloaded directly from the official Hugging Face repository, pinned to revision `9217f5db79a29953eb74d5343926648285ec7e67`. It is **491,400,032 bytes**. Its SHA-256 matches the publisher's LFS metadata:
+The same model was downloaded locally and on EC2 from the official Hugging Face repository at revision `9217f5db79a29953eb74d5343926648285ec7e67`. The downloaded GGUF is 491,400,032 bytes, with verified SHA-256:
 
 ```text
 74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db
 ```
 
-The weights are delivered separately from Git because of their size. `model-manifest.json` records the source, revision, byte count, and checksum. Stage 4 downloads and verifies the same official file on EC2 before importing it into Ollama.
+Weights are delivered separately from Git. `model-manifest.json` records the source and verification. The earlier exact-instance quota/price check and actual AWS rejection are preserved as `exact-instance-stage1.txt` and `exact-instance-launch-error.txt`.
 
-## Resuming the exact assignment
-
-Authenticate privately with AWS CLI (`aws login --profile opencsusm --region us-east-1`). No credentials or PEM files belong in Git. Use Git Bash on Windows, or Bash on Linux/macOS with AWS CLI, SSH, curl, and the normal GNU tools installed.
-
-From this directory, run stages 1 and 2 only when the account is allowed to launch `c7i.2xlarge`. Then run stages 3 and 4; they connect to EC2 over SSH and execute there. Stage 5 prints the command for a second terminal. Leave that tunnel running and run stage 6 in the first terminal. Confirm the actual JSON assistant reply contains `John`. If local port 11434 is already occupied, export `LOCAL_PORT=11435` for both stages 5 and 6; the EC2 service port stays 11434.
-
-Run stage 7 and then stage 8. Save the real stage 6 response and successful empty stage 8 output in the comment sections at the bottom of `opencsusm.sh`, replacing the current blocked-state record. Validate teardown even if installation or inference fails. Only then is the assignment ready to submit.
+Use Git Bash on Windows, or Bash with AWS CLI, SSH, curl, and GNU tools. Authenticate privately with `aws login --profile opencsusm --region us-east-1`. From this directory:
 
 ```bash
+export LOCAL_PORT=11435  # Use the same value for stages 5 and 6.
 bash opencsusm.sh 1
 bash opencsusm.sh 2
 bash opencsusm.sh 3
 bash opencsusm.sh 4
 bash opencsusm.sh 5
-# Execute the printed tunnel command in a second terminal; leave it running.
+# In a second terminal, execute the printed SSH tunnel command and leave it running.
 bash opencsusm.sh 6
 bash opencsusm.sh 7
 bash opencsusm.sh 8
 ```
 
-`.opencsusm-state/` holds the temporary private key and local operational state. `submission/.gitignore` excludes it, private PEM files, model weights, and environment files. Stage 8 deletes its PEM file. `submission/.gitattributes` preserves Bash-compatible LF line endings on Windows. No private keys, AWS credentials, weights, or unrelated existing submission files were included in this task's commit.
+Stages 3/4 execute on EC2 through SSH. Stage 6 executes locally through the tunnel. Always run stage 8 after any failed install/test as well. `.opencsusm-state/`, private keys, weights, and environment files are ignored; `.gitattributes` preserves LF endings. This task's commit includes only task files and evidence, with no credentials or unrelated submission changes.
 
-The existing course fork is [Darthh/OpenCSUSM45567](https://github.com/Darthh/OpenCSUSM45567). Its canonical GitHub name was restored from OpenCSUSM55435 to the name selected by the user. No new fork was needed. **Canvas submission was not made because the required cloud greeting is incomplete.**
+Repository: [Darthh/OpenCSUSM45567](https://github.com/Darthh/OpenCSUSM45567).
 
-Sources: the supplied CS446_OpenCSUSM_Project.pdf and GitHubForkCommands.txt; actual AWS CLI output in `evidence/`; [official Qwen model card](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF); [Ollama GGUF import](https://docs.ollama.com/import); [Ollama OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility); [AWS Free Tier EC2 eligibility](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-free-tier-usage.html).
+Sources: supplied CS446_OpenCSUSM_Project.pdf; actual AWS/SSH output in `evidence/`; [official Qwen model](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF); [Ollama import](https://docs.ollama.com/import); [Ollama OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility); [AWS Free Tier EC2 eligibility](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-free-tier-usage.html).

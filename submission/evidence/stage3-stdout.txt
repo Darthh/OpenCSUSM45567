@@ -1,0 +1,2 @@
+WARNING: No NVIDIA/AMD GPU detected. Ollama will run in CPU-only mode.
+{"version":"0.40.3"}

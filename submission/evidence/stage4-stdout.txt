@@ -1,0 +1,4 @@
+qwen2.5-0.5b-instruct-q4_k_m.gguf: OK
+NAME            ID              SIZE      MODIFIED               
+qwen2.5:0.5b    4dc316568ce0    491 MB    Less than a second ago    
+{"models":[{"name":"qwen2.5:0.5b","model":"qwen2.5:0.5b","modified_at":"2026-10-12T04:50:15.832667853Z","size":491400167,"digest":"4dc316568ce01c63bdbea170b779ea92f758471422eff55c30092f585f5171af","details":{"parent_model":"qwen2.5-0.5b-instruct-q4_k_m.gguf","format":"gguf","family":"qwen2","families":["qwen2"],"parameter_size":"630.17M","quantization_level":"Q4_K_M","context_length":32768,"embedding_length":896,"runner":"llamacpp"},"capabilities":["tools","completion"]}]}LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*          

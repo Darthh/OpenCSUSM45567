@@ -1,0 +1,11 @@
+{
+  "source": "owner IPv4 /32 (address omitted)",
+  "ingressRuleCount": 1,
+  "protocol": "tcp",
+  "observedAtUtc": "2026-10-12T04:49:50.8332510+00:00",
+  "toPort": 22,
+  "instanceType": "c7i-flex.large",
+  "freeTierEligible": true,
+  "fromPort": 22,
+  "publicInferencePortAllowed": false
+}

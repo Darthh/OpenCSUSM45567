@@ -1,0 +1,1 @@
+ssh -i '/c/Users/patri/OpenCSUSM45567-1/submission/.opencsusm-state/opencsusm45567-20261011.pem' ubuntu@3.238.187.128

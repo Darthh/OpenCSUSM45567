@@ -5,9 +5,11 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1 AWS_PAGER=""
 export AWS_PROFILE="${AWS_PROFILE:-opencsusm}"
 # cpu: a 0.5B greeting needs no GPU. G quota=0; Standard quota=32.
-# Exact PDF instance: c7i.2xlarge + Ollama; live Linux price $0.357/hour.
+# Free-plan workaround authorized by the user: c7i-flex.large + Ollama.
+# The PDF's c7i.2xlarge was rejected as not Free Tier eligible.
+# c7i-flex.large has 2 vCPUs/4 GiB, enough for the same 0.5B greeting test.
 LANE=cpu
-TYPE=c7i.2xlarge
+TYPE=c7i-flex.large
 MODEL=qwen2.5:0.5b
 REGION=us-east-1
 PORT=11434
@@ -178,11 +180,13 @@ REMOTE
 esac
 
 # ================= stage 6 reply, pasted verbatim =================
-# NOT RUN: stage 2 was blocked by AWS Free plan restrictions on c7i.2xlarge.
-# No EC2 instance launched. Stages 3-6 could not run; no reply is fabricated.
+# Command: LOCAL_PORT=11435 bash opencsusm.sh 6
+# Actual EC2 response through SSH, not a local inference response.
+# {"id":"chatcmpl-978","object":"chat.completion","created":1791780659,"model":"qwen2.5:0.5b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"Hello John! It's nice to meet you. How can I assist you today?"},"finish_reason":"stop"}],"usage":{"prompt_tokens":32,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens":18,"total_tokens":50}}
 # ================= stage 8 output, pasted verbatim =================
 # Command: bash opencsusm.sh 8
 # Exit status: 0. STDOUT: 0 bytes. STDERR: 0 bytes.
 # BEGIN VERBATIM STDOUT
 # END VERBATIM STDOUT
-# This proves cleanup after the failed launch, not a completed inference run.
+# Instance stopped, then terminated; no project disks, groups, or keys remain.
+# User-authorized Free-plan workaround: c7i-flex.large replaces c7i.2xlarge.
